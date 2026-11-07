@@ -96,7 +96,6 @@
     </div>
     <div class="stats">
       <div class="stat">오늘<b id="sToday"></b></div>
-      <div class="stat">같이 있던 친구<b id="sFriends"></b></div>
       <div class="stat">이번 달 출석<b id="sMonth"></b></div>
     </div>
     <div class="cal"><div class="h"><button onclick="moveCal(-1)">◀</button><h3 id="calTitle"></h3><button onclick="moveCal(1)">▶</button></div><div class="days" id="days"></div></div>
@@ -337,7 +336,6 @@ function render() {
   requestAnimationFrame(() => { me.style.left = left; me.style.bottom = bottom; });
   bb.textContent = msg; bb.style.left = `min(calc(${left} - 10px), 55%)`; bb.style.top = "64px";
   $("#sToday").textContent = t.status || "기록 없음";
-  $("#sFriends").textContent = (DATA.present != null ? DATA.present : "-") + "명";
   const m = (ME.months || {})[DATA.date.slice(0, 7)] || {};
   $("#sMonth").textContent = Object.values(m).filter(x => x.k === "귀가" || x.k === "조퇴" || x.k === "등원").length + "일";
   $("#updated").textContent = "갱신 " + (DATA.updated || "").replace("T", " ").slice(0, 16);
