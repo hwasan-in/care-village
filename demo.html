@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>돌봄교실 마을 (시연용)</title>
+<style>
+  :root { --bg:#DFF1EA; --ink:#163A33; --ink-2:#4E6B64; --line:#C9DED7; --in:#2BB673; --out:#F28C28; --chip:#FFE08A; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; background: var(--bg); color: var(--ink); }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 22px; margin: 0; font-weight: 900; }
+  .sub { color: var(--ink-2); font-size: 14px; margin: 4px 0 12px; }
+  /* 로그인 */
+  #login { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 30px 16px; }
+  #login .card { background: #fff; border: 3px solid var(--ink); border-radius: 24px; padding: 24px; width: min(420px, 100%); }
+  #login label { display: block; font-size: 14px; color: var(--ink-2); margin: 10px 0 4px; }
+  #login input { width: 100%; font-size: 22px; padding: 12px; border: 3px solid var(--line); border-radius: 14px; }
+  #login button { width: 100%; margin-top: 16px; font-size: 20px; font-weight: 900; padding: 14px; border-radius: 999px; border: none; background: var(--ink); color: #fff; }
+  #login .err { color: #E04E4E; font-weight: 700; min-height: 22px; margin-top: 8px; }
+  #login .peek { width: 140px; margin: 0 auto; }
+  /* 장면 */
+  .scene { position: relative; background: linear-gradient(#CDE8F5, #E6F3FA); border-radius: 24px; overflow: hidden; height: 360px; border: 3px solid var(--ink); }
+  .scene.evening { background: linear-gradient(#F7C9A3, #E7D0E8); }
+  .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 130px; background: #9FD37A; }
+  .road { position: absolute; left: 0; right: 0; bottom: 52px; height: 40px; background: #E9DCC4; border-top: 3px dashed #fff; border-bottom: 3px solid #C9B890; }
+  .school { position: absolute; left: 3%; bottom: 92px; width: 34%; height: 190px; background: #FFF3D6; border: 3px solid var(--ink); border-radius: 14px 14px 0 0; }
+  .school .roof { position: absolute; left: -4%; top: -26px; width: 108%; height: 32px; background: #F26B6B; border: 3px solid var(--ink); border-radius: 10px; }
+  .school .sign { position: absolute; left: 50%; transform: translateX(-50%); top: 12px; background: #fff; border: 2px solid var(--ink); border-radius: 8px; padding: 1px 10px; font-weight: 900; font-size: 13px; white-space: nowrap; }
+  .win { position: absolute; bottom: 0; width: 22%; height: 46%; background: #BFE3FF; border: 3px solid var(--ink); border-radius: 10px 10px 0 0; overflow: hidden; }
+  .win .c { position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); width: 85%; }
+  .win.dim .c { opacity: .3; filter: grayscale(1); }
+  .door { position: absolute; right: 8%; bottom: 0; width: 15%; height: 36%; background: #C98B55; border: 3px solid var(--ink); border-radius: 10px 10px 0 0; }
+  .place { position: absolute; bottom: 92px; width: 14%; height: 90px; background: #fff; border: 3px solid var(--ink); border-radius: 10px 10px 0 0; }
+  .place .roof { position: absolute; left: -8%; top: -34px; width: 116%; height: 36px; clip-path: polygon(50% 0, 100% 100%, 0 100%); background: #5B8DEF; }
+  .place .lab { position: absolute; left: 50%; transform: translateX(-50%); bottom: 6px; font-weight: 900; font-size: 12px; white-space: nowrap; }
+  .bus { position: absolute; bottom: 60px; left: 44%; width: 16%; height: 50px; background: #FFD166; border: 3px solid var(--ink); border-radius: 12px; }
+  .bus i { position: absolute; top: 8px; width: 26%; height: 16px; background: #BFE3FF; border: 2px solid var(--ink); border-radius: 4px; } .bus i:first-child { left: 10%; } .bus i:nth-child(2) { right: 10%; }
+  .bus b { position: absolute; bottom: -13px; width: 20px; height: 20px; background: var(--ink); border-radius: 50%; } .bus b:nth-child(3) { left: 12%; } .bus b:nth-child(4) { right: 12%; }
+  .me { position: absolute; width: 64px; transition: left 1.6s ease-in-out, bottom 1.6s; filter: drop-shadow(0 4px 0 rgba(0,0,0,.15)); z-index: 3; }
+  .bubble { position: absolute; background: #fff; border: 3px solid var(--ink); border-radius: 16px; padding: 7px 12px; font-weight: 800; font-size: 14px; max-width: 60%; z-index: 4; }
+  .bubble:after { content: ""; position: absolute; left: 22px; bottom: -12px; border: 6px solid transparent; border-top-color: var(--ink); }
+  .sun { position: absolute; right: 5%; top: 20px; width: 46px; height: 46px; background: #FFE08A; border-radius: 50%; border: 3px solid var(--ink); }
+  .cloud { position: absolute; top: 40px; left: 42%; width: 80px; height: 30px; background: #fff; border-radius: 20px; border: 3px solid var(--ink); }
+  .zz { position: absolute; font-weight: 900; color: var(--ink-2); font-size: 18px; }
+  /* 아래 */
+  .stats { display: flex; gap: 10px; margin-top: 12px; }
+  .stat { flex: 1; background: #fff; border-radius: 16px; padding: 10px 12px; border: 3px solid var(--line); font-size: 13px; color: var(--ink-2); }
+  .stat b { display: block; font-size: 20px; color: var(--ink); }
+  .cal { margin-top: 12px; background: #fff; border-radius: 16px; padding: 12px; border: 3px solid var(--line); }
+  .cal .h { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; } .cal h3 { margin: 0; font-size: 16px; flex: 1; }
+  .cal button { font-size: 14px; font-weight: 800; padding: 6px 12px; border-radius: 999px; border: 2px solid var(--ink); background: #fff; }
+  .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; } .days > * { min-width: 0; }
+  .wd { text-align: center; font-size: 12px; color: var(--ink-2); }
+  .d { aspect-ratio: 1; overflow: hidden; border-radius: 10px; background: #F2F6F4; display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 11px; color: var(--ink-2); position: relative; }
+  .d svg { width: 72%; } .d.on { background: #EAF8F0; border: 2px solid var(--in); } .d.abs { background: #FFF6D6; font-weight: 800; color: #8a6d00; }
+  .d .n { position: absolute; left: 4px; top: 2px; font-size: 10px; } .d.we { opacity: .5; }
+  .d .t { font-size: 10px; font-weight: 800; color: var(--ink); }
+  .foot { display: flex; gap: 10px; align-items: center; margin-top: 12px; font-size: 13px; color: var(--ink-2); flex-wrap: wrap; }
+  .foot button { font-size: 13px; padding: 6px 12px; border-radius: 999px; border: 2px solid var(--line); background: #fff; }
+  .hidden { display: none !important; }
+  @media (max-width: 520px) { .scene { height: 300px; } .school { height: 160px; } .me { width: 54px; } .stats { flex-wrap: wrap; } .stat { flex: 1 1 40%; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title">돌봄교실 마을</h1>
+  <div class="sub" id="subtitle"></div>
+
+  <div id="login">
+    <div class="card">
+      <div class="peek" id="peek"></div>
+      <label>아이 별명</label><input id="nick" type="text" placeholder="예: 구름이" autocomplete="off">
+      <label>가족코드 (6자리)</label><input id="code" type="password" inputmode="numeric" maxlength="6" placeholder="••••••">
+      <button id="go">들어가기</button>
+      <div class="err" id="err"></div>
+      <div style="font-size:12px;color:var(--ink-2)">별명과 가족코드는 돌봄교실에서 등록할 때 정한 것이에요. 이 페이지에는 아이 이름이 어디에도 저장되지 않습니다.</div>
+    </div>
+  </div>
+
+  <div id="main" class="hidden">
+    <div class="scene" id="scene">
+      <div class="sun" id="sun"></div><div class="cloud"></div>
+      <div class="ground"></div><div class="road"></div>
+      <div class="school"><div class="roof"></div><div class="sign" id="schoolName">돌봄교실</div>
+        <div class="win dim" style="left:6%"><div class="c" id="w1"></div></div>
+        <div class="win dim" style="left:32%"><div class="c" id="w2"></div></div>
+        <div class="win dim" style="left:58%"><div class="c" id="w3"></div></div>
+        <div class="door"></div></div>
+      <div class="bus"><i></i><i></i><b></b><b></b></div>
+      <div class="place" style="left:66%"><div class="roof"></div><div class="lab">우리 집</div></div>
+      <div class="place" style="left:83%"><div class="roof" style="background:#F6B544"></div><div class="lab">학원</div></div>
+      <div class="me" id="me"></div>
+      <div class="bubble" id="bubble"></div>
+    </div>
+    <div class="stats">
+      <div class="stat">오늘<b id="sToday"></b></div>
+      <div class="stat">같이 있던 친구<b id="sFriends"></b></div>
+      <div class="stat">이번 달 출석<b id="sMonth"></b></div>
+    </div>
+    <div class="cal"><div class="h"><button onclick="moveCal(-1)">◀</button><h3 id="calTitle"></h3><button onclick="moveCal(1)">▶</button></div><div class="days" id="days"></div></div>
+    <div class="foot"><span id="updated"></span><span style="flex:1"></span><button onclick="logout()">다른 아이 보기</button></div>
+  </div>
+</div>
+
+<script>
+// characters.js - 늘봄 귀가 캐릭터 (자체 제작 SVG, 전신 2등신)
+// charSvg(id, pose) -> <svg> 문자열.  pose: "stand"(기본) | "sit" | "walk"
+(function (g) {
+  const CHARACTERS = [
+    { id: "rabbit",   name: "토끼",   body: "#FFFFFF", ear: "#FFC9D6", cloth: "#FF8FA3" },
+    { id: "bear",     name: "곰",     body: "#C98B55", ear: "#F4D2B2", cloth: "#5B8DEF" },
+    { id: "cat",      name: "고양이", body: "#F7D8A8", ear: "#F2B6B6", cloth: "#7CC7A1" },
+    { id: "dog",      name: "강아지", body: "#F2E7D5", ear: "#B98A5C", cloth: "#F6B544" },
+    { id: "fox",      name: "여우",   body: "#F5A454", ear: "#FFFFFF", cloth: "#5FBFD8" },
+    { id: "panda",    name: "판다",   body: "#FFFFFF", ear: "#2E2E2E", cloth: "#8FD36A" },
+    { id: "koala",    name: "코알라", body: "#B8BFC7", ear: "#F2C2CB", cloth: "#F28CA5" },
+    { id: "penguin",  name: "펭귄",   body: "#2E3A4A", ear: "#FFFFFF", cloth: "#FFD166" },
+    { id: "chick",    name: "병아리", body: "#FFE266", ear: "#FFB347", cloth: "#6FB6FF" },
+    { id: "frog",     name: "개구리", body: "#8CD46E", ear: "#FFFFFF", cloth: "#FF9B6A" },
+    { id: "pig",      name: "돼지",   body: "#F9C6D0", ear: "#F39CAF", cloth: "#7EC8E3" },
+    { id: "tiger",    name: "호랑이", body: "#F7A93B", ear: "#2E2E2E", cloth: "#5B8DEF" },
+    { id: "lion",     name: "사자",   body: "#F3C56B", ear: "#C9843B", cloth: "#F26B6B" },
+    { id: "monkey",   name: "원숭이", body: "#B5805A", ear: "#F2D5BC", cloth: "#FFD166" },
+    { id: "owl",      name: "부엉이", body: "#A98467", ear: "#F2E3D0", cloth: "#8FD36A" },
+    { id: "hedgehog", name: "고슴도치", body: "#F2D9B8", ear: "#8C6A4F", cloth: "#5FBFD8" },
+    { id: "squirrel", name: "다람쥐", body: "#D89B5A", ear: "#F5E1C8", cloth: "#F28CA5" },
+    { id: "hamster",  name: "햄스터", body: "#F6E0B5", ear: "#E7B98A", cloth: "#7CC7A1" },
+    { id: "sheep",    name: "양",     body: "#F2E8DC", ear: "#DCD3C8", cloth: "#F6B544" },
+    { id: "deer",     name: "사슴",   body: "#D9A66A", ear: "#F7E1C5", cloth: "#6FB6FF" },
+    { id: "elephant", name: "코끼리", body: "#BFC8D8", ear: "#F2C9D3", cloth: "#FF9B6A" },
+    { id: "octopus",  name: "문어",   body: "#F28FB1", ear: "#FFC4D8", cloth: "#8FD36A" },
+    { id: "dino",     name: "공룡",   body: "#7FD3C1", ear: "#4DB39E", cloth: "#F26B6B" },
+    { id: "whale",    name: "고래",   body: "#7FB3E6", ear: "#DCEFFF", cloth: "#FFD166" },
+  ];
+  const K = "#3A2E2E";   // 외곽선
+  const SW = 2.4;
+
+  // ---------- 공통 얼굴 (머리 중심 50,44 반지름 30) ----------
+  const eyes = (open = true) => open
+    ? `<ellipse cx="38.5" cy="45" rx="5.2" ry="6.2" fill="${K}"/><ellipse cx="61.5" cy="45" rx="5.2" ry="6.2" fill="${K}"/>
+       <circle cx="40.5" cy="42.5" r="2.2" fill="#fff"/><circle cx="63.5" cy="42.5" r="2.2" fill="#fff"/><circle cx="36.8" cy="47.5" r="1" fill="#fff"/><circle cx="59.8" cy="47.5" r="1" fill="#fff"/>
+       <path d="M31 38 q7 -5 14 -1 M55 37 q7 -4 14 1" fill="none" stroke="${K}" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>`
+    : `<path d="M35 44 q4 -4 8 0 M57 44 q4 -4 8 0" fill="none" stroke="${K}" stroke-width="2.4" stroke-linecap="round"/>`;
+  const blush = `<ellipse cx="30" cy="52" rx="5.5" ry="3" fill="#FF9DB0" opacity=".75"/><ellipse cx="70" cy="52" rx="5.5" ry="3" fill="#FF9DB0" opacity=".75"/>`;
+  const smile = (w = 5) => `<path d="M${50 - w} 54 q${w} ${w * .9} ${w * 2} 0" fill="none" stroke="${K}" stroke-width="2.2" stroke-linecap="round"/>`;
+  const nose = (col = K) => `<ellipse cx="50" cy="50" rx="3" ry="2" fill="${col}"/>`;
+  const head = (c, inner = "") => `<circle cx="50" cy="44" r="30" fill="${c.body}" stroke="${K}" stroke-width="${SW}"/>${inner}`;
+
+  // ---------- 몸 (옷) ----------
+  function body(c, pose) {
+    const cl = c.cloth, sk = c.body;
+    if (pose === "sit") return `
+      <ellipse cx="50" cy="104" rx="22" ry="14" fill="${cl}" stroke="${K}" stroke-width="${SW}"/>
+      <ellipse cx="36" cy="112" rx="8" ry="5" fill="${sk}" stroke="${K}" stroke-width="${SW}"/><ellipse cx="64" cy="112" rx="8" ry="5" fill="${sk}" stroke="${K}" stroke-width="${SW}"/>
+      <ellipse cx="29" cy="96" rx="5" ry="7" fill="${sk}" stroke="${K}" stroke-width="${SW}" transform="rotate(20 29 96)"/><ellipse cx="71" cy="96" rx="5" ry="7" fill="${sk}" stroke="${K}" stroke-width="${SW}" transform="rotate(-20 71 96)"/>`;
+    const legL = pose === "walk" ? `<ellipse cx="42" cy="121" rx="7" ry="4.5" fill="${sk}" stroke="${K}" stroke-width="${SW}" transform="translate(-4 -3)"/>` : `<ellipse cx="42" cy="121" rx="7" ry="4.5" fill="${sk}" stroke="${K}" stroke-width="${SW}"/>`;
+    const legR = pose === "walk" ? `<ellipse cx="58" cy="121" rx="7" ry="4.5" fill="${sk}" stroke="${K}" stroke-width="${SW}" transform="translate(4 0)"/>` : `<ellipse cx="58" cy="121" rx="7" ry="4.5" fill="${sk}" stroke="${K}" stroke-width="${SW}"/>`;
+    const armL = pose === "walk" ? `rotate(-35 33 86)` : `rotate(15 33 86)`;
+    const armR = pose === "walk" ? `rotate(35 67 86)` : `rotate(-15 67 86)`;
+    return `
+      <path d="M33 80 q17 -10 34 0 q6 14 4 30 q-21 8 -42 0 q-2 -16 4 -30 Z" fill="${cl}" stroke="${K}" stroke-width="${SW}" stroke-linejoin="round"/>
+      <path d="M41 82 q9 7 18 0" fill="none" stroke="#fff" stroke-width="2.2" opacity=".75"/>
+      <circle cx="50" cy="96" r="1.6" fill="#fff" opacity=".8"/><circle cx="50" cy="103" r="1.6" fill="#fff" opacity=".8"/>
+      ${legL}${legR}
+      <ellipse cx="33" cy="90" rx="5.5" ry="9" fill="${sk}" stroke="${K}" stroke-width="${SW}" transform="${armL}"/>
+      <ellipse cx="67" cy="90" rx="5.5" ry="9" fill="${sk}" stroke="${K}" stroke-width="${SW}" transform="${armR}"/>`;
+  }
+
+  // ---------- 동물별 머리 장식 ----------
+  const EARS = {
+    rabbit: c => `<ellipse cx="38" cy="14" rx="7" ry="18" fill="${c.body}" stroke="${K}" stroke-width="${SW}" transform="rotate(-8 38 14)"/><ellipse cx="38" cy="15" rx="3.5" ry="12" fill="${c.ear}" transform="rotate(-8 38 14)"/>
+      <ellipse cx="62" cy="14" rx="7" ry="18" fill="${c.body}" stroke="${K}" stroke-width="${SW}" transform="rotate(8 62 14)"/><ellipse cx="62" cy="15" rx="3.5" ry="12" fill="${c.ear}" transform="rotate(8 62 14)"/>`,
+    bear: c => `<circle cx="27" cy="20" r="10" fill="${c.body}" stroke="${K}" stroke-width="${SW}"/><circle cx="27" cy="20" r="5" fill="${c.ear}"/><circle cx="73" cy="20" r="10" fill="${c.body}" stroke="${K}" stroke-width="${SW}"/><circle cx="73" cy="20" r="5" fill="${c.ear}"/>`,
+    cat: c => `<path d="M24 32 L26 8 L44 20 Z" fill="${c.body}" stroke="${K}" stroke-width="${SW}" stroke-linejoin="round"/><path d="M29 27 L30 15 L39 21 Z" fill="${c.ear}"/><path d="M76 32 L74 8 L56 20 Z" fill="${c.body}" stroke="${K}" stroke-width="${SW}" stroke-linejoin="round"/><path d="M71 27 L70 15 L61 21 Z" fill="${c.ear}"/>`,
+    dog: c => `<ellipse cx="22" cy="40" rx="8" ry="16" fill="${c.ear}" stroke="${K}" stroke-width="${SW}" transform="rotate(12 22 40)"/><ellipse cx="78" cy="40" rx="8" ry="16" fill="${c.ear}" stroke="${K}" stroke-width="${SW}" transform="rotate(-12 78 40)"/>`,
+    fox: c => `<path d="M22 34 L22 6 L44 20 Z" fill="${c.body}" stroke="${K}" stroke-width="${SW}" stroke-linejoin="round"/><path d="M27 29 L27 14 L38 21 Z" fill="${c.ear}"/><path d="M78 34 L78 6 L56 20 Z" fill="${c.body}" stroke="${K}" stroke-width="${SW}" stroke-linejoin="round"/><path d="M73 29 L73 14 L62 21 Z" fill="${c.ear}"/>`,
+    panda: c => `<circle cx="27" cy="20" r="10" fill="${c.ear}"/><circle cx="73" cy="20" r="10" fill="${c.ear}"/>`,
+    koala: c => `<circle cx="20" cy="36" r="13" fill="${c.body}" stroke="${K}" stroke-width="${SW}"/><circle cx="20" cy="36" r="7" fill="${c.ear}"/><circle cx="80" cy="36" r="13" fill="${c.body}" stroke="${K}" stroke-width="${SW}"/><circle cx="80" cy="36" r="7" fill="${c.ear}"/>`,
+    penguin: () => ``,
+    chick: () => `<path d="M42 16 q4 -10 8 0 q4 -10 8 0" fill="none" stroke="${K}" stroke-width="2.4" stroke-linecap="round"/>`,
+    frog: c => `<circle cx="34" cy="18" r="9" fill="${c.body}" stroke="${K}" stroke-width="${SW}"/><circle cx="66" cy="18" r="9" fill="${c.body}" stroke="${K}" stroke-width="${SW}"/><circle cx="34" cy="18" r="5" fill="#fff"/><circle cx="66" cy="18" r="5" fill="#fff"/><circle cx="35" cy="18" r="2.5" fill="${K}"/><circle cx="67" cy="18" r="2.5" fill="${K}"/>`,
+    pig: c => `<path d="M26 30 L22 10 L42 20 Z" fill="${c.ear}" stroke="${K}" stroke-width="${SW}" stroke-linejoin="round"/><path d="M74 30 L78 10 L58 20 Z" fill="${c.ear}" stroke="${K}" stroke-width="${SW}" stroke-linejoin="round"/>`,
+    tiger: c => `<circle cx="27" cy="20" r="9" fill="${c.body}" stroke="${K}" stroke-width="${SW}"/><circle cx="73" cy="20" r="9" fill="${c.body}" stroke="${K}" stroke-width="${SW}"/>`,
+    lion: c => [0,30,60,90,120,150,180,210,240,270,300,330].map(a => `<circle cx="${50+33*Math.cos(a*Math.PI/180)}" cy="${44+33*Math.sin(a*Math.PI/180)}" r="10" fill="${c.ear}" stroke="${K}" stroke-width="${SW}"/>`).join("") + `<circle cx="50" cy="44" r="34" fill="${c.ear}"/>`,
+    monkey: c => `<circle cx="19" cy="42" r="10" fill="${c.body}" stroke="${K}" stroke-width="${SW}"/><circle cx="19" cy="42" r="4.5" fill="${c.ear}"/><circle cx="81" cy="42" r="10" fill="${c.body}" stroke="${K}" stroke-width="${SW}"/><circle cx="81" cy="42" r="4.5" fill="${c.ear}"/>`,
+    owl: c => `<path d="M26 24 L22 6 L42 16 Z M74 24 L78 6 L58 16 Z" fill="${c.body}" stroke="${K}" stroke-width="${SW}" stroke-linejoin="round"/>`,
+    hedgehog: c => `<path d="M22 44 L14 26 L28 30 L26 12 L40 22 L46 6 L52 20 L60 6 L64 22 L76 12 L74 30 L88 26 L80 44 Z" fill="${c.ear}" stroke="${K}" stroke-width="${SW}" stroke-linejoin="round"/>`,
+    squirrel: c => `<path d="M28 30 L26 8 L44 20 Z M72 30 L74 8 L56 20 Z" fill="${c.body}" stroke="${K}" stroke-width="${SW}" stroke-linejoin="round"/>`,
+    hamster: c => `<circle cx="30" cy="20" r="8" fill="${c.body}" stroke="${K}" stroke-width="${SW}"/><circle cx="70" cy="20" r="8" fill="${c.body}" stroke="${K}" stroke-width="${SW}"/>`,
+    sheep: c => [200,230,260,290,320,340].map(a => `<circle cx="${50+30*Math.cos(a*Math.PI/180)}" cy="${44+30*Math.sin(a*Math.PI/180)}" r="10" fill="#fff" stroke="${K}" stroke-width="${SW}"/>`).join("") + `<ellipse cx="19" cy="44" rx="8" ry="4.5" fill="${c.ear}" stroke="${K}" stroke-width="${SW}"/><ellipse cx="81" cy="44" rx="8" ry="4.5" fill="${c.ear}" stroke="${K}" stroke-width="${SW}"/>`,
+    deer: c => `<path d="M32 22 L26 2 M26 2 L18 8 M26 2 L32 10 M68 22 L74 2 M74 2 L82 8 M74 2 L68 10" fill="none" stroke="#8C6A4F" stroke-width="3.2" stroke-linecap="round"/><ellipse cx="21" cy="32" rx="9" ry="5" fill="${c.ear}" stroke="${K}" stroke-width="${SW}" transform="rotate(-20 21 32)"/><ellipse cx="79" cy="32" rx="9" ry="5" fill="${c.ear}" stroke="${K}" stroke-width="${SW}" transform="rotate(20 79 32)"/>`,
+    elephant: c => `<circle cx="19" cy="44" r="14" fill="${c.body}" stroke="${K}" stroke-width="${SW}"/><circle cx="19" cy="44" r="8" fill="${c.ear}"/><circle cx="81" cy="44" r="14" fill="${c.body}" stroke="${K}" stroke-width="${SW}"/><circle cx="81" cy="44" r="8" fill="${c.ear}"/>`,
+    octopus: () => ``,
+    dino: c => `<path d="M32 18 L38 4 L44 18 M46 16 L52 2 L58 16 M60 18 L66 6 L72 20" fill="${c.ear}" stroke="${K}" stroke-width="${SW}" stroke-linejoin="round"/>`,
+    whale: () => `<path d="M50 14 q-5 -9 -11 -12 M50 14 q5 -9 11 -12" fill="none" stroke="#7FB3E6" stroke-width="3" stroke-linecap="round"/>`,
+  };
+  const FACE = {   // 머리 위에 덧그릴 것
+    rabbit: c => eyes() + blush + nose("#F28CA5") + smile(4),
+    bear: c => `<ellipse cx="50" cy="52" rx="10" ry="7" fill="${c.ear}"/>` + eyes() + blush + nose() + smile(3),
+    cat: c => eyes() + blush + nose("#F28CA5") + smile(4) + `<path d="M16 48 L28 50 M16 55 L28 53 M84 48 L72 50 M84 55 L72 53" stroke="${K}" stroke-width="1.5" stroke-linecap="round"/>`,
+    dog: c => `<circle cx="62" cy="42" r="9" fill="${c.ear}" opacity=".8"/>` + eyes() + blush + nose() + smile(4),
+    fox: c => `<path d="M30 56 Q50 78 70 56 Q50 48 30 56Z" fill="#fff"/>` + eyes() + blush + nose() + smile(4),
+    panda: c => `<ellipse cx="39" cy="44" rx="8.5" ry="10" fill="${c.ear}" transform="rotate(-12 39 44)"/><ellipse cx="61" cy="44" rx="8.5" ry="10" fill="${c.ear}" transform="rotate(12 61 44)"/><circle cx="39" cy="44" r="3.6" fill="#fff"/><circle cx="61" cy="44" r="3.6" fill="#fff"/><circle cx="39.6" cy="44.4" r="2" fill="${K}"/><circle cx="61.6" cy="44.4" r="2" fill="${K}"/>` + blush + nose() + smile(3),
+    koala: c => eyes() + blush + `<ellipse cx="50" cy="52" rx="6.5" ry="8" fill="${K}"/>`,
+    penguin: c => `<ellipse cx="50" cy="50" rx="20" ry="20" fill="#fff"/>` + eyes() + blush + `<path d="M44 49 L56 49 L50 56 Z" fill="#FFB347" stroke="${K}" stroke-width="1.4" stroke-linejoin="round"/>`,
+    chick: c => eyes() + blush + `<path d="M44 49 L56 49 L50 56 Z" fill="${c.ear}" stroke="${K}" stroke-width="1.4" stroke-linejoin="round"/>`,
+    frog: c => blush + `<path d="M36 52 q14 12 28 0" fill="none" stroke="${K}" stroke-width="2.2" stroke-linecap="round"/>`,
+    pig: c => eyes() + blush + `<ellipse cx="50" cy="53" rx="9" ry="6" fill="${c.ear}" stroke="${K}" stroke-width="1.8"/><circle cx="46.5" cy="53" r="1.6" fill="${K}"/><circle cx="53.5" cy="53" r="1.6" fill="${K}"/>`,
+    tiger: c => `<path d="M42 18 l4 9 M50 16 l0 9 M58 18 l-4 9 M22 40 l9 3 M22 50 l9 0 M78 40 l-9 3 M78 50 l-9 0" stroke="${c.ear}" stroke-width="3" stroke-linecap="round"/><ellipse cx="50" cy="54" rx="9" ry="6" fill="#fff"/>` + eyes() + blush + nose() + smile(3),
+    lion: c => `<ellipse cx="50" cy="54" rx="9" ry="6" fill="#fff"/>` + eyes() + blush + nose() + smile(3),
+    monkey: c => `<path d="M28 52 Q32 28 50 30 Q68 28 72 52 Q50 72 28 52Z" fill="${c.ear}"/>` + eyes() + blush + nose() + smile(4),
+    owl: c => `<circle cx="39" cy="44" r="11" fill="${c.ear}"/><circle cx="61" cy="44" r="11" fill="${c.ear}"/><circle cx="39" cy="44" r="5" fill="${K}"/><circle cx="61" cy="44" r="5" fill="${K}"/><circle cx="40.5" cy="42.5" r="1.6" fill="#fff"/><circle cx="62.5" cy="42.5" r="1.6" fill="#fff"/>` + blush + `<path d="M46 52 L54 52 L50 59 Z" fill="#FFB347" stroke="${K}" stroke-width="1.4" stroke-linejoin="round"/>`,
+    hedgehog: c => eyes() + blush + nose() + smile(4),
+    squirrel: c => `<ellipse cx="50" cy="53" rx="9" ry="6" fill="${c.ear}"/>` + eyes() + blush + nose() + smile(3),
+    hamster: c => `<circle cx="32" cy="54" r="11" fill="${c.body}"/><circle cx="68" cy="54" r="11" fill="${c.body}"/><ellipse cx="50" cy="54" rx="8" ry="5" fill="${c.ear}"/>` + eyes() + blush + nose("#F28CA5"),
+    sheep: c => eyes() + blush + nose() + smile(4),
+    deer: c => `<ellipse cx="50" cy="54" rx="10" ry="7" fill="${c.ear}"/><circle cx="36" cy="30" r="2" fill="#fff"/><circle cx="64" cy="30" r="2" fill="#fff"/>` + eyes() + blush + nose() + smile(3),
+    elephant: c => eyes() + blush + `<path d="M45 50 Q43 72 56 78 Q63 80 64 74" fill="${c.body}" stroke="${K}" stroke-width="${SW}" stroke-linecap="round" stroke-linejoin="round"/><path d="M55 50 Q56 66 61 72" fill="none" stroke="${K}" stroke-width="${SW}" stroke-linecap="round"/><path d="M47 58 h6 M48 65 h6" stroke="${K}" stroke-width="1.4" stroke-linecap="round"/>`,
+    octopus: c => `<circle cx="32" cy="30" r="3" fill="${c.ear}"/><circle cx="68" cy="30" r="3" fill="${c.ear}"/><circle cx="50" cy="22" r="3" fill="${c.ear}"/>` + eyes() + blush + smile(4),
+    dino: c => `<circle cx="50" cy="58" r="2" fill="${c.ear}"/><circle cx="40" cy="62" r="2" fill="${c.ear}"/><circle cx="60" cy="62" r="2" fill="${c.ear}"/>` + eyes() + blush + smile(5),
+    whale: c => `<path d="M22 58 Q50 74 78 58 L78 66 Q50 82 22 66Z" fill="${c.ear}"/>` + eyes() + blush + smile(5),
+  };
+
+  const CLOTHES = ["#FF8FA3", "#5B8DEF", "#7CC7A1", "#F6B544", "#5FBFD8", "#8FD36A", "#F26B6B", "#B48CF2"];
+  const ACCESSORIES = [
+    { id: "none",   name: "없음" },
+    { id: "ribbon", name: "리본" },
+    { id: "cap",    name: "모자" },
+    { id: "glasses",name: "안경" },
+    { id: "scarf",  name: "목도리" },
+    { id: "flower", name: "꽃" },
+    { id: "crown",  name: "왕관" },
+    { id: "phones", name: "헤드폰" },
+    { id: "bag",    name: "가방" },
+  ];
+  const ACC = {
+    ribbon: col => `<path d="M62 22 l12 -8 l0 16 Z M62 22 l12 8 l0 -16 Z" fill="${col}" stroke="${K}" stroke-width="2" stroke-linejoin="round"/><circle cx="62" cy="22" r="3.5" fill="${col}" stroke="${K}" stroke-width="2"/>`,
+    cap: col => `<path d="M24 30 q26 -26 52 0 Z" fill="${col}" stroke="${K}" stroke-width="2.2" stroke-linejoin="round"/><path d="M22 30 h56 q4 0 8 4 l-8 2 Z" fill="${col}" stroke="${K}" stroke-width="2.2" stroke-linejoin="round"/><circle cx="50" cy="12" r="3" fill="${col}" stroke="${K}" stroke-width="2"/>`,
+    glasses: col => `<circle cx="38.5" cy="45" r="9" fill="none" stroke="${col}" stroke-width="3"/><circle cx="61.5" cy="45" r="9" fill="none" stroke="${col}" stroke-width="3"/><path d="M47.5 45 h5 M20 42 l9.5 1 M80 42 l-9.5 1" stroke="${col}" stroke-width="3" stroke-linecap="round"/>`,
+    scarf: col => `<path d="M30 72 q20 10 40 0 l2 8 q-22 10 -44 0 Z" fill="${col}" stroke="${K}" stroke-width="2.2" stroke-linejoin="round"/><path d="M60 78 l6 18 l8 -4 l-8 -16 Z" fill="${col}" stroke="${K}" stroke-width="2.2" stroke-linejoin="round"/>`,
+    flower: col => `${[0,72,144,216,288].map(a => `<circle cx="${72+6*Math.cos(a*Math.PI/180)}" cy="${20+6*Math.sin(a*Math.PI/180)}" r="4" fill="${col}" stroke="${K}" stroke-width="1.6"/>`).join("")}<circle cx="72" cy="20" r="3.5" fill="#FFE08A" stroke="${K}" stroke-width="1.6"/>`,
+    crown: col => `<path d="M32 20 l6 -14 l12 10 l12 -10 l6 14 Z" fill="${col}" stroke="${K}" stroke-width="2.2" stroke-linejoin="round"/><circle cx="38" cy="7" r="2.5" fill="#F26B6B"/><circle cx="50" cy="15" r="2.5" fill="#5FBFD8"/><circle cx="62" cy="7" r="2.5" fill="#F26B6B"/>`,
+    phones: col => `<path d="M22 44 q0 -30 28 -30 q28 0 28 30" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round"/><rect x="16" y="40" width="10" height="16" rx="4" fill="${col}" stroke="${K}" stroke-width="2"/><rect x="74" y="40" width="10" height="16" rx="4" fill="${col}" stroke="${K}" stroke-width="2"/>`,
+    bag: col => `<path d="M36 80 q-10 10 -6 24" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round"/><rect x="18" y="96" width="20" height="16" rx="5" fill="${col}" stroke="${K}" stroke-width="2.2"/><path d="M22 104 h12" stroke="${K}" stroke-width="2" stroke-linecap="round"/>`,
+  };
+
+  function charSvg(id, pose = "stand", opts = {}) {
+    const base = CHARACTERS.find(x => x.id === id) || CHARACTERS[0];
+    const c = Object.assign({}, base, opts.cloth ? { cloth: opts.cloth } : {});
+    const accCol = opts.accColor || "#F26B6B";
+    const ears = EARS[c.id] ? EARS[c.id](c) : "";
+    const headPart = c.id === "lion" ? ears + head(c, FACE[c.id](c)) : ears + head(c, FACE[c.id](c));
+    const octoLegs = c.id === "octopus" ? [30,40,50,60,70].map(x => `<path d="M${x} 70 q-3 10 2 16" fill="none" stroke="${K}" stroke-width="6" stroke-linecap="round"/><path d="M${x} 70 q-3 10 2 16" fill="none" stroke="${c.body}" stroke-width="3.5" stroke-linecap="round"/>`).join("") : "";
+    const bodyPart = c.id === "octopus" ? octoLegs : body(c, pose);
+    const acc = opts.acc && ACC[opts.acc] ? ACC[opts.acc](accCol) : "";
+    const accBehind = opts.acc === "bag" ? acc : "", accFront = opts.acc === "bag" ? "" : acc;
+    // 머리가 몸 위에 오도록 몸 먼저
+    return `<svg viewBox="0 0 100 128" xmlns="http://www.w3.org/2000/svg" class="char char-${c.id}">${accBehind}${bodyPart}${headPart}${accFront}</svg>`;
+  }
+  g.CHARACTERS = CHARACTERS; g.charSvg = charSvg; g.CLOTHES = CLOTHES; g.ACCESSORIES = ACCESSORIES;
+})(window);
+
+</script>
+<script>
+const $ = s => document.querySelector(s);
+const ITER = 100000, SALT = "neulbom-care-v1";
+const enc = new TextEncoder(), dec = new TextDecoder();
+const DATA_URL = "data.json";
+let KEY = null, KID = null, DATA = null, ME = null, calYM = null;
+
+// ---------- 암호 (parent_crypto.py 와 동일) ----------
+function sha256js(m){var K=[],H=[],i,j,p=2,n=0;function fr(x){return((x-Math.floor(x))*4294967296)|0}
+while(n<64){var pr=true;for(i=2;i*i<=p;i++)if(p%i===0){pr=false;break}if(pr){if(n<8)H[n]=fr(Math.pow(p,1/2));K[n++]=fr(Math.pow(p,1/3))}p++}
+var l=m.length,bl=((l+8)>>6)+1,w=new Int32Array(bl*16);for(i=0;i<l;i++)w[i>>2]|=m[i]<<(24-(i%4)*8);w[l>>2]|=0x80<<(24-(l%4)*8);w[bl*16-1]=l*8;w[bl*16-2]=Math.floor(l/536870912);
+var W=new Int32Array(64);for(var b=0;b<bl;b++){for(i=0;i<16;i++)W[i]=w[b*16+i];for(i=16;i<64;i++){var a=W[i-15],c=W[i-2];W[i]=(W[i-16]+((a>>>7|a<<25)^(a>>>18|a<<14)^(a>>>3))+W[i-7]+((c>>>17|c<<15)^(c>>>19|c<<13)^(c>>>10)))|0}
+var A=H[0],B=H[1],C=H[2],D=H[3],E=H[4],F=H[5],G=H[6],Hh=H[7];for(i=0;i<64;i++){var t1=(Hh+((E>>>6|E<<26)^(E>>>11|E<<21)^(E>>>25|E<<7))+((E&F)^(~E&G))+K[i]+W[i])|0,t2=(((A>>>2|A<<30)^(A>>>13|A<<19)^(A>>>22|A<<10))+((A&B)^(A&C)^(B&C)))|0;Hh=G;G=F;F=E;E=(D+t1)|0;D=C;C=B;B=A;A=(t1+t2)|0}
+H[0]=(H[0]+A)|0;H[1]=(H[1]+B)|0;H[2]=(H[2]+C)|0;H[3]=(H[3]+D)|0;H[4]=(H[4]+E)|0;H[5]=(H[5]+F)|0;H[6]=(H[6]+G)|0;H[7]=(H[7]+Hh)|0}
+var o=new Uint8Array(32);for(i=0;i<8;i++){o[i*4]=H[i]>>>24;o[i*4+1]=H[i]>>>16&255;o[i*4+2]=H[i]>>>8&255;o[i*4+3]=H[i]&255}return o}
+async function sha(bytes) { const u = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes.buffer || bytes); if (window.crypto && crypto.subtle && !window.__forceJs) return new Uint8Array(await crypto.subtle.digest("SHA-256", u)); return sha256js(u); }
+function cat(...arrs) { const n = arrs.reduce((a, b) => a + b.length, 0), out = new Uint8Array(n); let o = 0; for (const a of arrs) { out.set(a, o); o += a.length; } return out; }
+const hex = u => [...u].map(b => b.toString(16).padStart(2, "0")).join("");
+async function deriveKey(nick, code) {
+  let h = await sha(cat(enc.encode(SALT), enc.encode(nick.trim() + "|" + code.trim())));
+  const salt = enc.encode(SALT);
+  for (let i = 0; i < ITER; i++) h = await sha(cat(salt, h));
+  return h;
+}
+async function kidId(key) { return hex(await sha(cat(key, enc.encode("id")))).slice(0, 16); }
+async function decrypt(key, blob) {
+  const ct = Uint8Array.from(atob(blob.ct), c => c.charCodeAt(0));
+  if (hex(await sha(cat(key, enc.encode("mac"), ct))) !== blob.mac) throw new Error("mac");
+  const out = new Uint8Array(ct.length); let i = 0, pos = 0;
+  while (pos < ct.length) { const ctr = new Uint8Array([(i >>> 24) & 255, (i >>> 16) & 255, (i >>> 8) & 255, i & 255]); const ks = await sha(cat(key, enc.encode("ks"), ctr)); for (let j = 0; j < 32 && pos < ct.length; j++, pos++) out[pos] = ct[pos] ^ ks[j]; i++; }
+  return JSON.parse(dec.decode(out));
+}
+
+// ---------- 로그인 ----------
+$("#peek").innerHTML = charSvg("rabbit", "stand", { acc: "ribbon" });
+$("#go").onclick = login; $("#code").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+async function login() {
+  const nick = $("#nick").value, code = $("#code").value; $("#err").textContent = "";
+  if (!nick.trim() || !/^\d{6}$/.test(code.trim())) { $("#err").textContent = "별명과 6자리 가족코드를 넣어 주세요"; return; }
+  $("#go").textContent = "확인 중…"; $("#go").disabled = true;
+  try { KEY = await deriveKey(nick, code); KID = await kidId(KEY); await load(true); }
+  catch (e) { $("#err").textContent = "별명이나 가족코드가 맞지 않아요"; }
+  $("#go").textContent = "들어가기"; $("#go").disabled = false;
+}
+function logout() { try { localStorage.removeItem("care_key"); } catch (e) {} KEY = KID = ME = null; $("#main").classList.add("hidden"); $("#login").classList.remove("hidden"); }
+async function load(remember) {
+  DATA = {"title": "돌봄교실 마을", "room": "선택형 돌봄( 1 )반", "date": "2026-11-11", "updated": "2026-11-11T15:41:00", "present": 4, "kids": {"5c524a4c0c27acf6": {"ct": "hW+vY64NUuVs16SgmA+QTOx50FbZgCV/2dlx/Kkyh2p9MhqUBALAp7Lmo0MzT+cXc1+laZPpzYvYxYt1DX/0EI5Xhr4LL6vs3q1PIjaUDWNQGqCZ3QL4Gr05NBd5pBj3gbzylPxoJN6eXyF+KF3NM1dZwIX1XUU4x0GWmbu8/VuqqRlZTfCGWGEaCE0EQ/B3z8/eygVjsCVYLpxCzyAMOcNQUcwY0VsUzOj13uGC+VCgFv5cnAFqetv1e0dDxLAHtZ7PEb6di9WMDbSZOBm2hi8vGlaJXT+t", "mac": "f6ba099d2b17e79b49b8a352a1921fe3f9babec67c0c9fa4152bbe2a4fc3165d"}}};
+  const blob = DATA.kids[KID]; if (!blob) throw new Error("nokid");
+  ME = await decrypt(KEY, blob);
+  if (remember) { try { localStorage.setItem("care_key", JSON.stringify({ k: hex(KEY), id: KID })); } catch (e) {} }
+  $("#login").classList.add("hidden"); $("#main").classList.remove("hidden");
+  calYM = DATA.date.slice(0, 7); render();
+}
+(async () => { try { const s = JSON.parse(localStorage.getItem("care_key") || "null"); if (s) { KEY = Uint8Array.from(s.k.match(/../g).map(h => parseInt(h, 16))); KID = s.id; await load(false); } } catch (e) {} })();
+setInterval(() => { if (KEY) load(false).catch(() => {}); }, 60000);
+
+// ---------- 화면 ----------
+const WD = "일월화수목금토";
+function placeOf(w) { if (!w) return "home"; if (/학원|연장/.test(w)) return "academy"; return "home"; }
+function render() {
+  $("#title").textContent = DATA.title || "돌봄교실 마을";
+  $("#schoolName").textContent = DATA.room || "돌봄교실";
+  const d = new Date(DATA.date + "T00:00:00");
+  $("#subtitle").textContent = `${ME.nick} · ${d.getMonth() + 1}월 ${d.getDate()}일 ${WD[d.getDay()]}요일`;
+  const h = new Date().getHours(); $("#scene").classList.toggle("evening", h >= 17 || h < 7);
+  ["w1", "w2", "w3"].forEach((id, i) => $("#" + id).innerHTML = charSvg(["bear", "cat", "penguin"][i], "sit"));
+  const t = ME.today || {}, me = $("#me"), bb = $("#bubble");
+  let pose = "stand", left = "20%", bottom = "100px", msg = "";
+  if (t.status === "교실") { pose = "sit"; left = "12%"; bottom = "100px"; msg = `돌봄교실에 있어요 ${t.time ? "(" + t.time + " 등원)" : ""}`; }
+  else if (t.status === "귀가" || t.status === "조퇴") {
+    const p = placeOf(t.who); pose = "walk";
+    if (/학원차|버스/.test(t.who || "")) { left = "47%"; bottom = "86px"; } else if (p === "academy") { left = "78%"; bottom = "58px"; } else { left = "60%"; bottom = "58px"; }
+    msg = `${t.time}에 ${t.who ? t.who + (/차|버스/.test(t.who) ? " 타고" : "와 함께") : ""} ${t.status === "조퇴" ? "조퇴했어요" : "집에 갔어요"}`;
+  }
+  else if (t.status === "가정돌봄" || t.status === "병결") { pose = "sit"; left = "60%"; bottom = "58px"; msg = t.status === "병결" ? "오늘은 아파서 쉬어요. 얼른 나아요!" : "오늘은 집에서 지냈어요"; }
+  else { pose = "stand"; left = "22%"; bottom = "96px"; msg = "아직 오늘 기록이 없어요"; }
+  me.innerHTML = charSvg(ME.char.id, pose, ME.char); me.style.left = "20%"; me.style.bottom = "96px";
+  requestAnimationFrame(() => { me.style.left = left; me.style.bottom = bottom; });
+  bb.textContent = msg; bb.style.left = `min(calc(${left} - 10px), 55%)`; bb.style.top = "64px";
+  $("#sToday").textContent = t.status || "기록 없음";
+  $("#sFriends").textContent = (DATA.present != null ? DATA.present : "-") + "명";
+  const m = (ME.months || {})[DATA.date.slice(0, 7)] || {};
+  $("#sMonth").textContent = Object.values(m).filter(x => x.k === "귀가" || x.k === "조퇴" || x.k === "등원").length + "일";
+  $("#updated").textContent = "갱신 " + (DATA.updated || "").replace("T", " ").slice(0, 16);
+  renderCal();
+}
+function moveCal(n) { const [y, m] = calYM.split("-").map(Number); const d = new Date(y, m - 1 + n, 1); calYM = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; renderCal(); }
+function renderCal() {
+  const [y, m] = calYM.split("-").map(Number), last = new Date(y, m, 0).getDate(), first = new Date(y, m - 1, 1).getDay();
+  const data = (ME.months || {})[calYM] || {};
+  $("#calTitle").textContent = `${y}년 ${m}월`;
+  const g = $("#days"); g.innerHTML = "";
+  for (const w of WD) { const e = document.createElement("div"); e.className = "wd"; e.textContent = w; g.appendChild(e); }
+  for (let i = 0; i < first; i++) g.appendChild(document.createElement("div"));
+  for (let d = 1; d <= last; d++) {
+    const key = String(d).padStart(2, "0"), r = data[key], e = document.createElement("div"), we = (first + d - 1) % 7 === 0 || (first + d - 1) % 7 === 6;
+    e.className = "d" + (we ? " we" : "") + (r ? (r.k === "가정돌봄" || r.k === "병결" ? " abs" : " on") : "");
+    e.innerHTML = `<span class="n">${d}</span>` + (r ? (r.k === "가정돌봄" || r.k === "병결" ? r.k : charSvg(ME.char.id, "stand", ME.char) + `<span class="t">${r.t || ""}</span>`) : "");
+    if (r && r.w) e.title = `${r.t} ${r.w}`;
+    g.appendChild(e);
+  }
+}
+</script>
+<div style="text-align:center;font-size:12px;color:#7a8a86;padding:10px 0 18px">시연용 화면 · 가상 데이터 (2026 공공 AI 대전환 챌린지)</div></body>
+</html>
